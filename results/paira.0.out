@@ -1,0 +1,42 @@
+[0;31m[1m
+Performing enhanced Kernighan-Lin (K&L) based bi-partitioning algorithm for hypergraphs:
+[0mDesign name     : paira
+Cells#          : 951
+Nets#           : 814
+Crossing nets#  : 515
+Gain function   : Basic K&L
+Algorithm passes: m3
+
+[1m- Performing pass# 1
+[0m  Minimal crossing nets numbet for this pass: 189
+
+[1m- Performing pass# 2
+[0m  Minimal crossing nets numbet for this pass: 166
+
+[1m- Performing pass# 3
+[0m  Minimal crossing nets numbet for this pass: 157
+
+[1m- Performing pass# 4
+[0m  Minimal crossing nets numbet for this pass: 144
+
+[1m- Performing pass# 5
+[0m  Minimal crossing nets numbet for this pass: 118
+
+[1m- Performing pass# 6
+[0m  Minimal crossing nets numbet for this pass: 99
+
+[1m- Performing pass# 7
+[0m  Minimal crossing nets numbet for this pass: 98
+
+[1m- Performing pass# 8
+[0m  Minimal crossing nets numbet for this pass: 95
+
+[1m- Performing pass# 9
+[0m  Minimal crossing nets numbet for this pass: 95
+
+[1m- Performing pass# 10
+[0m  Minimal crossing nets numbet for this pass: 95
+
+[0;31m* Convereged after 8 passes, with 95 crossing nets
+
+[0m

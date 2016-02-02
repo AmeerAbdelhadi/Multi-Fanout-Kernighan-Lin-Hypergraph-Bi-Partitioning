@@ -1,0 +1,42 @@
+[0;31m[1m
+Performing enhanced Kernighan-Lin (K&L) based bi-partitioning algorithm for hypergraphs:
+[0mDesign name     : pairb
+Cells#          : 951
+Nets#           : 814
+Crossing nets#  : 515
+Gain function   : Enhanced K&L #1, alpha=0.6
+Algorithm passes: m3
+
+[1m- Performing pass# 1
+[0m  Minimal crossing nets numbet for this pass: 178
+
+[1m- Performing pass# 2
+[0m  Minimal crossing nets numbet for this pass: 91
+
+[1m- Performing pass# 3
+[0m  Minimal crossing nets numbet for this pass: 20
+
+[1m- Performing pass# 4
+[0m  Minimal crossing nets numbet for this pass: 17
+
+[1m- Performing pass# 5
+[0m  Minimal crossing nets numbet for this pass: 10
+
+[1m- Performing pass# 6
+[0m  Minimal crossing nets numbet for this pass: 8
+
+[1m- Performing pass# 7
+[0m  Minimal crossing nets numbet for this pass: 8
+
+[1m- Performing pass# 8
+[0m  Minimal crossing nets numbet for this pass: 7
+
+[1m- Performing pass# 9
+[0m  Minimal crossing nets numbet for this pass: 5
+
+[1m- Performing pass# 10
+[0m  Minimal crossing nets numbet for this pass: 5
+
+[0;31m* Convereged after 8 passes, with 5 crossing nets
+
+[0m

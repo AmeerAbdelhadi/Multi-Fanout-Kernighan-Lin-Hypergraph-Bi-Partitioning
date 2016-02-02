@@ -1,0 +1,14 @@
+#! /bin/tcsh -f
+
+echo "Testcase Cells\tNets\tSize"
+foreach infile (*.txt)
+	set testCase = `echo $infile | cut -d"." -f1`
+	set header   = `head -n 1 $infile | cut -d\n -f1 | tr "\n" " "`
+	set cellsN	 = `echo $header | cut -d" " -f1`
+	set netsN	 = `echo $header | cut -d" " -f2`
+	set ny		 = `echo $header | cut -d" " -f3`
+	set nx		 = `echo $header | cut -d" " -f4`
+	echo "${testCase}\t ${cellsN}\t${netsN}\t${ny}X${nx}"
+end
+
+unset infile

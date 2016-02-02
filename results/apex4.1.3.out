@@ -1,0 +1,33 @@
+[0;31m[1m
+Performing enhanced Kernighan-Lin (K&L) based bi-partitioning algorithm for hypergraphs:
+[0mDesign name     : apex4
+Cells#          : 1290
+Nets#           : 1271
+Crossing nets#  : 786
+Gain function   : Enhanced K&L #1, alpha=3.0
+Algorithm passes: m3
+
+[1m- Performing pass# 1
+[0m  Minimal crossing nets numbet for this pass: 313
+
+[1m- Performing pass# 2
+[0m  Minimal crossing nets numbet for this pass: 280
+
+[1m- Performing pass# 3
+[0m  Minimal crossing nets numbet for this pass: 226
+
+[1m- Performing pass# 4
+[0m  Minimal crossing nets numbet for this pass: 211
+
+[1m- Performing pass# 5
+[0m  Minimal crossing nets numbet for this pass: 203
+
+[1m- Performing pass# 6
+[0m  Minimal crossing nets numbet for this pass: 203
+
+[1m- Performing pass# 7
+[0m  Minimal crossing nets numbet for this pass: 203
+
+[0;31m* Convereged after 5 passes, with 203 crossing nets
+
+[0m

@@ -1,0 +1,303 @@
+## Multi-Fanout Kernighan-Lin Hypergraph Bi-Partitioning ##
+## Ameer M.S. Abdelhadi ; ameer.abdelhadi@gmail.com      ##
+## The University of British Columbia  ( UBC )   2011    ##
+
+## Problem Definition: ##
+
+An enhanced version of the Kernighan-Lin based bi-partitioning algorithm for circuits with multi-fanout nets (nets that connect more than two nodes).
+
+#### Objectives: ####
+Minimize the number of nets that connect blocks in the two partitions, while keeping the same size partitions (or differing by at most 1 if the number of blocks is odd).
+This means that each net (even a multi-fanout net) contributes either 0 or 1 to the total crossing count, never more than this.
+A net contributes 1 to the crossing count if it connects cells that fall in both partitions.
+
+A simple implementation of the K&L algorithm for circuits with multi-terminal nets may not work well.
+Consider a net that connects 10 nodes. Suppose that, in the initial partition, eight of those nodes are in Partition A.
+According to the simple Gain equation, moving any of the nodes would have no impact on the Gain (considering only this net), and thus, moving any of the nodes would be considered "equal".
+Yet, clearly, it would be better to move one of the two nodes from Partition B to Partition A (in the hopes that the final remaining node can be moved later).
+
+#### input circuit format: ####
+The first line contains 4 values:
+1. the number of cells to be placed.
+2. the number of connections between the cells.
+3. the number of rows ny upon which the circuit should be placed.
+4. the number of columns nx upon which the circuit should be placed.
+In the following example, there are 3 cells, 3 connections between the cells,
+and the circuit should be placed on a chip with two rows of two cells each.
+
+The netlist file then contains one line per net.
+Each net can connect to two or more logic blocks.
+For each line, the first number is the number of logic blocks to which this net connects.
+The remaining numbers are the block numbers connected to this net.
+Note that blocks are numbered from 0.
+So, in the following example, there are three nets:
+1. one that connects blocks 0, 1 and 2,
+2. one that connects block 2 to block 0,
+3. one that connects block 1 to block 2.
+
+**example netlist:**
+```
+3 3 2 2
+3 0 1 2
+2 2 0
+2 1 2
+```
+
+**corresponding circuit:**
+```
+                .---.
+            .-->| 1 |--.
+            |   '---'  |
+    .---.   |          |
+.-->| 0 |---|          |
+|   '---'   |          |
+|           |          '-->.---.
+|           |              | 2 |--.
+|           '------------->'---'  |
+|                                 |
+'---------------------------------'
+```
+
+**target chip:**
+```
+ _________________
+|                 |
+|  .----. .----.  |
+|  |Cell| |Cell|  |
+|  |Site| |Site|  |
+|  '----' '----'  |
+|  .----. .----.  |
+|  |Cell| |Cell|  |
+|  |Site| |Site|  |
+|  '----' '----'  |
+|_________________|
+```
+
+- - - -
+
+## Tool Installation: ##
+
+Using a Linux machine (with X11), invoke:
+
+```
+make
+make clean
+```
+
+- - - -
+
+## Tool Usage: ##
+
+```
+  partitioning INFILE [OPTIONS]
+```
+
+**Options:**
+```
+  -help       (or -h): Print this message
+  -gui        (or -g): Enable graphical user interface (GUI) 
+                       Automatically enabled if postscript is enabled
+  -verbose    (or -v): Enable verbose logging,
+                       Automatically enabled if GUI is disabled
+  -postscript (or -p): Generate PostScript every screen refresh
+                       Will enable GUI mode
+  -runmode    (or -r): Run mode, followed by one of the following
+                       'step'  (or 's'): display results every one step
+                       'pass'  (or 'p'): display results every full pass
+                       'final' (or 'f'): display print final result only
+                       Default mode is 'step'
+  -iterations (or -i): Number of K&L algorithms iterations/passes
+                       * Followed by an integer, determines exact number of
+                         algorithm passes
+                       * Followed by an m<integer> (e.g. m3), determines the
+                         number of max ineffective passes before termination
+                       Default is m3 (run until 3 passes show no improvements
+  -function   (or -f): Gain function, one of: 0, 1, or 2, as follows:
+                       0: Original K&L gain func (reduction in crossing nets)
+                       1: Outbalanced K&L 1, equal gain cells are outbalanced
+                          by the ratio of cell amount in each group among all
+                          the cells which are connected to each specific cell
+                       2: Outbalanced K&L 2, equal gain cells are outbalanced
+                          by the ratio of cell amount in each group among all
+                          the cells which are connected to each specific cell
+                          ,calculated for each net individually, & normalized
+                       Default is 2 (Outbalanced K&L 2)
+  -alpha      (or -a): a float positive parameter, used to increase the gain
+                       of the small groups in order to converge fater
+                       Default is 1
+```
+
+**Input file syntax:**
+```
+  <CELLS#> <NET#> <ROWS#> <COLUMNS#>
+  <#CELLS_CONNECTED_TO_NET_1> <LIST_OF_CELLS_CONNECTED_TO_NET_1>
+  <#CELLS_CONNECTED_TO_NET_2> <LIST_OF_CELLS_CONNECTED_TO_NET_2>
+  ...
+  <#CELLS_CONNECTED_TO_NET_n> <LIST_OF_CELLS_CONNECTED_TO_NET_n>
+```
+
+**Examples:**
+```
+  partitioning cps.txt (using default options)
+  partitioning cps.txt -gui -iterations 10 (GUI enabled, run 10 passes)
+  partitioning cps.txt -gui -iterations m3 (stop after 3 ineffective passes)
+  partitioning cps.txt -gui -iterations m3 -runmode pass (draw every pass))
+  partitioning cps.txt -gui -verbose -postscr -runmode pass -iter m4 -func 0
+  partitioning cps.txt -g -v -p -r p -i m4 -f 0 (same as above)
+```
+
+#### Run test cases in batch mode: ####
+To run several test cases in batch with variant parameters, use ’runall.csh’ C-Shell script:
+```
+runall.csh <path to input files>
+```
+e.g.
+```
+runall.csh infiles/
+```
+
+The script runs partitioning for all test cases in verbose mode and default parameters, with all possible combinations of gain functions and alphas.
+The output is logged into ‘out’ directory for every run separately.
+Minimal crossing nets results are listed in ’results.nets’, and minimum passes required for convergence are listed in ’results.pass’, for each test case and parameter combination.
+
+- - - -
+
+## Pseudo-code for the partitioning procedure: ##
+
+Divide the cells arbitrary into two equal groups (or different by 1 at most)
+Minimal crossing nets count = Current crossing nets count
+Mark this initial solution as best solution
+
+```
+REPEAT algorithmPasses {
+  REPEAT totalCellsCount {
+    Unlock all cells
+    FOREACH cell
+      Calculated and update gain
+    Move max gain cell to the another group and lock this cell
+    IF (current crossing nets count <= minimal crossing nets count)
+      Minimal crossing nets count = Current crossing nets count
+      Mark this solution as best solution
+  }
+}
+```
+
+#### Basic K&L Gain Function: ####
+
+For each cell, merely indicates the reduction of crossing nets if this cell is moved.
+Instead of checking if a cell is locked or causing imbalance, this information is integrated into the gain function, namely, if the cell is locked or is causing imbalance, the gain of this cell is –infinity, hence will be never chosen.
+
+**Notations:**
+```
+  crossingNets#             : current crossing nets count
+  crossing#NetsIfMoved(cell): crossing nets count if 'cell' is moved
+  isLocked(cell)            : indicates if 'cell' is locked
+  movingCauseImbalance(cell): indicates if moving 'cell' causes imbalance
+
+basicK&L(cell) = isLocked(cell) OR movingCauseImbalance(cell) ?
+                 -INFINITY                                    :
+                 crossingNets# - crossing#NetsIfMoved(cell)
+```
+
+#### Overbalanced K&L #1 Gain Function: ####
+
+The basic K&L gain function is not good enough for hypergraph, since nets that do not affect the crossing count after moving a cell, will not affect the gain of that cell.
+Actually, it is worth to move cell to other group with more cells connected to that cell, since several movements may cause to move all the cells to the other group, hence reducing crossing nets.
+Equal gain cells should be overbalanced depends on the cell count at each group that are connected to each cell.
+The ratio between cells count indicates how much it is worth to move a cell (calculated by ratio function bellow), the sign function indicates if the overbalance should be added or reduced from the gain.
+Since small groups cause to reduce crossing nets count faster, alpha is intended to give higher overbalance to small groups.
+The overbalance gain over the basic K&L function is between 0 and 1 (exclusive), hence will only overbalance equal gain cells.
+
+**Notations:**
+```
+  cellsA#(cell): number of cells that are connected to 'cell'
+                 and in the same group of 'cell'
+  cellsB#(cell): number of cells that are connected to 'cell'
+                 but in the other group of 'cell'
+  RATIO(x,y)   : MIN(x,y)/MAX(x,y)
+  SIGN(x)      : x=0 ? 0 : (x>0 ? 1 : -1)
+  alpha        : a positive parameter, indicates the effect of the group size on the overbalance
+
+  overbalanced1(cell) = BasicK&L + 0.5 + (   SIGN(cells#B-cells#A)
+                                           * (cells#A+1)^(-alpha )
+                                           * (1-RATIO(cells#B,cells#A))/2
+                                          )
+```
+
+#### Overbalanced K&L #2 Gain Function: ####
+
+This gain function is similar to the previous one, but each net is treated individually to overbalance equal gain cells.
+The total overbalance sum is normalized to achieve overbalance smaller than 1.
+
+**Notations:**
+```
+  cellsNetA#(cell,net): number of cells that are connected to 'cell'
+                        through 'net' and in the same group of 'cell'
+  cellsNetB#(cell,net): number of cells that are connected to 'cell'
+                        through 'net' but in the other group of 'cell'
+  totalCellsCount     : is the total cell count in the design. (or hypergraph vertices)
+
+  overbalanced2(cell) =
+          BasicK&L + 
+          ( 0.5 + Sum over all nets, say 'net' that are connected to 'cell' {
+                    (   SIGN(cellsNet#B-cellsNet#A)
+                      * (cellsNet#A+1)^(-alpha )
+                      * (1-RATIO(cellsNet#B,cellsNet#A))/2
+                    )
+                  }
+          ) / totalCellsCount
+```
+
+- - - -
+
+## Experimental results: ##
+
+#### TABLE I: Count of minimal crossing nets with same initial partitioning ####
+Testcase|Total Cells|Total Nets|Basic K&L|K&L#1 α=0|K&L#1 α=.2|K&L#1 α=.4|K&L#1 α=.6|K&L#1 α=.8|K&L#1 α=1|K&L#1 α=1.5|K&L#1 α=2|K&L#1 α=2.5|K&L#1 α=3|K&L#2 α=0|K&L#2 α=.2|K&L#2 α=.4|K&L#2 α=.6|K&L#2 α=.8|K&L#2 α=1|K&L#2 α=1.5|K&L#2 α=2|K&L#2 α=2.5|K&L#2 α=3|min
+--------|-----------|----------|---------|---------|----------|----------|----------|----------|---------|-----------|---------|-----------|---------|---------|----------|----------|----------|----------|---------|-----------|---------|-----------|---------|---
+cm151a  |22         |20        |36       |39       |25        |25        |24        |40        |40       |24         |28       |28         |28       |25       |42        |41        |41        |41        |41       |37         |27       |38         |38       |24
+cm138a  |24         |16        |178      |157      |117       |133       |154       |163       |154      |165        |161      |172        |166      |153      |159       |169       |127       |170       |149      |151        |149      |137        |154      |117
+cm150a  |36         |35        |184      |204      |254       |196       |202       |224       |221      |206        |229      |201        |203      |217      |211       |225       |187       |184       |204      |179        |172      |186        |168      |168
+cm162a  |37         |32        |51       |32       |36        |31        |38        |30        |33       |31         |43       |43         |33       |38       |37        |31        |31        |30        |40       |42         |30       |52         |33       |30
+alu2    |213        |207       |4        |4        |4         |4         |4         |4         |4        |4          |4        |4          |4        |4        |4         |4         |4         |4         |         |4          |4        |4          |4        |4    4
+C880    |260        |234       |8        |8        |8         |6         |6         |6         |6        |6          |6        |6          |6        |6        |7         |7         |7         |7         |7        |7          |7        |7          |7        |6
+e64     |403        |338       |5        |5        |5         |5         |5         |5         |5        |5          |5        |5          |5        |5        |5         |5         |5         |5         |5        |5          |5        |5          |5        |5
+apex1   |786        |741       |6        |6        |8         |8         |8         |8         |9        |9          |9        |9          |9        |6        |6         |6         |6         |6         |6        |6          |6        |6          |6        |6
+paira   |951        |814       |134      |146      |132       |136       |137       |139       |140      |143        |138      |137        |138      |119      |126       |135       |134       |133       |133      |135        |125      |131        |134      |119
+cps     |882        |773       |62       |63       |64        |57        |63        |63        |59       |61         |61       |63         |63       |56       |55        |56        |55        |54        |54       |54         |53       |58         |58       |53
+apex4   |1290       |1271      |95       |13       |5         |8         |5         |5         |5        |14         |13       |13         |5        |13       |13        |7         |5         |5         |5        |32         |18       |5          |27       |5
+Avg.    |445.8      |407.4     |69.4     |61.5     |59.8      |55        |58.7      |62.5      |61.5     |60.7       |63.4     |61.9       |60       |58.4     |60.5      |62.4      |54.7      |58        |58.9     |59.3       |54.2     |57.2       |57.6     |48.8
+
+
+#### TABEL II: Count of algorithm passes required to converge to minimal crossing nets count ####
+Testcase|Total Cells|Total Nets|Basic K&L|K&L#1 α=0|K&L#1 α=.2|K&L#1 α=.4|K&L#1 α=.6|K&L#1 α=.8|K&L#1 α=1|K&L#1 α=1.5|K&L#1 α=2|K&L#1 α=2.5|K&L#1 α=3|K&L#2 α=0|K&L#2 α=.2|K&L#2 α=.4|K&L#2 α=.6|K&L#2 α=.8|K&L#2 α=1|K&L#2 α=1.5|K&L#2 α=2|K&L#2 α=2.5|K&L#2 α=3|min
+--------|-----------|----------|---------|---------|----------|----------|----------|----------|---------|-----------|---------|-----------|---------|---------|----------|----------|----------|----------|---------|-----------|---------|-----------|---------|---
+m151a   |22         |20        |6        |4        |5         |5         |5         |3         |3        |5          |4        |5          |5        |4        |3         |4         |3         |2         |2        |4          |5        |3          |3        |5
+cm138a  |24         |16        |2        |3        |8         |5         |6         |3         |6        |3          |5        |4          |5        |5        |3         |3         |5         |2         |6        |5          |6        |7          |5        |8
+cm150a  |36         |35        |6        |5        |5         |4         |4         |7         |6        |6          |6        |5          |5        |4        |5         |5         |4         |6         |5        |9          |7        |7          |6        |9
+cm162a  |37         |32        |3        |4        |3         |6         |4         |4         |4        |5          |4        |4          |3        |3        |4         |4         |5         |4         |6        |6          |4        |3          |6        |6
+alu2    |213        |207       |1        |1        |1         |1         |1         |1         |1        |1          |1        |1          |1        |1        |1         |1         |1         |1         |1        |1          |1        |1          |1        |1
+C880    |260        |234       |1        |1        |1         |2         |2         |2         |2        |2          |2        |2          |2        |2        |1         |1         |1         |1         |1        |1          |1        |1          |1        |2
+e64     |403        |338       |1        |1        |1         |1         |1         |1         |1        |1          |1        |1          |1        |1        |1         |1         |1         |1         |1        |1          |1        |1          |1        |1
+apex1   |786        |741       |2        |2        |3         |3         |3         |3         |2        |2          |2        |2          |2        |2        |2         |2         |2         |2         |2        |2          |2        |3          |2        |3
+paira   |951        |814       |3        |2        |5         |6         |4         |4         |4        |3          |5        |6          |3        |6        |4         |3         |4         |3         |3        |2          |4        |4          |3        |6
+cps     |882        |773       |8        |3        |2         |5         |4         |4         |3        |3          |3        |3          |3        |4        |4         |4         |4         |3         |3        |6          |4        |4          |4        |6
+apex4   |1290       |1271      |8        |5        |10        |5         |8         |8         |8        |5          |5        |5          |8        |3        |3         |6         |8         |8         |10       |4          |5        |12         |5        |12
+Avg.    |445.8      |407.4     |3.7      |2.8      |4         |3.9       |3.8       |3.6       |3.6      |3.3        |3.5      |3.5        |3.5      |3.2      |2.8       |3.1       |3.5       |3         |3.6      |3.7        |3.6      |4.2        |3.4      |5.4
+
+
+#### TABEL III: Results of several tries with random initial partitioning and alpha=0.2 ####
+Testcase|Total cells|Total nets| Crossing Nets|Passes
+--------|-----------|----------|--------------|------
+cm151a  |22         |20        |5             |1
+cm138a  |24         |16        |4             |1
+cm150a  |36         |35        |6             |1
+cm162a  |37         |32        |6             |1
+alu2    |213        |207       |24            |3
+C880    |260        |234       |27            |8
+e64     |403        |338       |50            |3
+apex1   |786        |741       |111           |8
+paira   |951        |814       |2             |7
+cps     |882        |773       |117           |9
+apex4   |1290       |1271      |176           |8
+Avg.    |445.8      |407.4     |48            |4.5
